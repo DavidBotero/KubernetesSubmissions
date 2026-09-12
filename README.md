@@ -17,3 +17,4 @@ Submissions for the DevOps with Kubernetes course.
 - [1.9.](./ping_pong)
 - [1.10.](./log_output)
 - [1.11.](./persistent-volume)
+- [1.12.](./the_project)
