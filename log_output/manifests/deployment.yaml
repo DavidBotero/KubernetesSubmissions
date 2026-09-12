@@ -16,6 +16,9 @@ spec:
       volumes:
         - name: shared-status
           emptyDir: {}
+        - name: log-output-config
+          configMap:
+            name: log-output-config
       containers:
         - name: log-writer
           image: davidsboteron/log-writer:1
@@ -23,7 +26,15 @@ spec:
             - name: shared-status
               mountPath: /usr/src/app/files
         - name: log-reader
-          image: davidsboteron/log-reader:3
+          image: davidsboteron/log-reader:4
+          env:
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: log-output-config
+                  key: MESSAGE
           volumeMounts:
             - name: shared-status
               mountPath: /usr/src/app/files
+            - name: log-output-config
+              mountPath: /usr/src/app/config
