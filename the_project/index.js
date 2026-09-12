@@ -36,9 +36,30 @@ const server = http.createServer(async (req, res) => {
   }
 
   res.writeHead(200, { 'Content-Type': 'text/html' })
-  res.end(`<h1>Todo App</h1>
-<img src="/image" alt="random" width="300" />
-<p>The project is up and running.</p>`)
+  res.end(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Todo App</title>
+</head>
+<body>
+  <main>
+    <div>
+      <h1>The project App</h1>
+      <img src="/image" alt="Kubeapp" width="300" />
+      <form action="/todos" method="post">
+        <input type="text" id="content" name="content" maxlength="140" required>
+        <button type="submit">Create todo</button>
+      </form>
+      <ul>
+        <li>Learn JavaScript</li>
+        <li>Learn React</li>
+        <li>Build a project</li>
+      </ul>
+      <p>DevOps with Kubernetes 2026</p>
+    </div>
+  </main>
+</body>
+</html>`)
 })
 
 server.listen(PORT, () => {
