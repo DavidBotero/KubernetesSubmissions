@@ -14,4 +14,4 @@ spec:
     spec:
       containers:
         - name: log-output
-          image: davidsboteron/log-output:1
+          image: davidsboteron/log-output:2
