@@ -1,10 +1,11 @@
 const http = require('http')
 const fs = require('fs')
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT
 const IMAGE_PATH = '/usr/src/app/files/image.jpg'
 const CACHE_MS = 10 * 60 * 1000
-const TODO_BACKEND_URL = process.env.TODO_BACKEND_URL || 'http://todo-backend-svc:3000'
+const TODO_BACKEND_URL = process.env.TODO_BACKEND_URL
+const PICSUM_URL = process.env.PICSUM_URL
 
 const isImageFresh = () => {
   try {
@@ -16,7 +17,7 @@ const isImageFresh = () => {
 }
 
 const refreshImage = async () => {
-  const response = await fetch('https://picsum.photos/1200')
+  const response = await fetch(PICSUM_URL)
   const buffer = Buffer.from(await response.arrayBuffer())
   fs.writeFileSync(IMAGE_PATH, buffer)
 }
