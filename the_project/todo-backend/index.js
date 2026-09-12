@@ -41,6 +41,8 @@ const readBody = (req) => new Promise((resolve) => {
 })
 
 const server = http.createServer(async (req, res) => {
+  console.log(`${req.method} ${req.url}`)
+
   if (req.method === 'GET' && req.url === '/todos') {
     const result = await client.query('SELECT content, done FROM todos ORDER BY id')
     sendJson(res, 200, result.rows)
@@ -57,10 +59,12 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (!content || content.length > 140) {
+      console.log(`todo rejected, content too long or missing (length ${content ? content.length : 0})`)
       sendJson(res, 400, { error: 'content missing or too long' })
       return
     }
 
+    console.log(`todo created: ${content}`)
     const result = await client.query(
       'INSERT INTO todos (content) VALUES ($1) RETURNING content, done',
       [content]

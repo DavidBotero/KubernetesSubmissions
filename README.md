@@ -31,3 +31,4 @@ Submissions for the DevOps with Kubernetes course.
 - [2.7.](./ping_pong)
 - [2.8.](./the_project)
 - [2.9.](./the_project)
+- [2.10.](./the_project)
