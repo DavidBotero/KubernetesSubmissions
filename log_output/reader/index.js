@@ -3,7 +3,7 @@ const fs = require('fs')
 
 const PORT = process.env.PORT || 3000
 const STATUS_FILE = '/usr/src/app/files/status.txt'
-const PONGS_FILE = '/usr/src/app/pongfiles/pongs.txt'
+const PINGPONG_URL = process.env.PINGPONG_URL || 'http://ping-pong-svc:3000/pongs'
 
 const readFileOrDefault = (path, fallback) => {
   try {
@@ -13,9 +13,18 @@ const readFileOrDefault = (path, fallback) => {
   }
 }
 
-const server = http.createServer((req, res) => {
+const fetchPongs = async () => {
+  try {
+    const response = await fetch(PINGPONG_URL)
+    return await response.text()
+  } catch (e) {
+    return '0'
+  }
+}
+
+const server = http.createServer(async (req, res) => {
   const status = readFileOrDefault(STATUS_FILE, 'waiting for data...')
-  const pongs = readFileOrDefault(PONGS_FILE, '0')
+  const pongs = await fetchPongs()
   res.writeHead(200, { 'Content-Type': 'text/plain' })
   res.end(`${status}.\nPing / Pongs: ${pongs}`)
 })
