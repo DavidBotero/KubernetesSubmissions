@@ -15,7 +15,12 @@ spec:
     spec:
       containers:
         - name: todo-backend
-          image: davidsboteron/todo-backend:2
+          image: davidsboteron/todo-backend:3
           env:
             - name: PORT
               value: "3000"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: todo-postgres-secret
+                  key: DATABASE_URL
