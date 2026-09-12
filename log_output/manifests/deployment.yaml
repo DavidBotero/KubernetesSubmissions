@@ -15,9 +15,6 @@ spec:
       volumes:
         - name: shared-status
           emptyDir: {}
-        - name: shared-pongs
-          persistentVolumeClaim:
-            claimName: pingpong-log-pvc
       containers:
         - name: log-writer
           image: davidsboteron/log-writer:1
@@ -25,10 +22,7 @@ spec:
             - name: shared-status
               mountPath: /usr/src/app/files
         - name: log-reader
-          image: davidsboteron/log-reader:2
+          image: davidsboteron/log-reader:3
           volumeMounts:
             - name: shared-status
               mountPath: /usr/src/app/files
-            - name: shared-pongs
-              mountPath: /usr/src/app/pongfiles
-              readOnly: true
