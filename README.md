@@ -23,3 +23,4 @@ Submissions for the DevOps with Kubernetes course.
 ### Chapter 3
 
 - [2.1.](./log_output)
+- [2.2.](./the_project)

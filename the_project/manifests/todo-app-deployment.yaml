@@ -18,10 +18,12 @@ spec:
             claimName: project-pvc
       containers:
         - name: todo-app
-          image: davidsboteron/todo-app:4
+          image: davidsboteron/todo-app:5
           env:
             - name: PORT
               value: "3000"
+            - name: TODO_BACKEND_URL
+              value: "http://todo-backend-svc:3000"
           volumeMounts:
             - name: project-files
               mountPath: /usr/src/app/files
