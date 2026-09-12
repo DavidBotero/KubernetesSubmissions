@@ -27,3 +27,4 @@ Submissions for the DevOps with Kubernetes course.
 - [2.3.](./namespaces.yaml)
 - [2.4.](./the_project)
 - [2.5.](./log_output)
+- [2.6.](./the_project)
