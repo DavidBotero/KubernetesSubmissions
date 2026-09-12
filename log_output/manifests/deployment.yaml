@@ -12,6 +12,17 @@ spec:
       labels:
         app: log-output
     spec:
+      volumes:
+        - name: shared-status
+          emptyDir: {}
       containers:
-        - name: log-output
-          image: davidsboteron/log-output:2
+        - name: log-writer
+          image: davidsboteron/log-writer:1
+          volumeMounts:
+            - name: shared-status
+              mountPath: /usr/src/app/files
+        - name: log-reader
+          image: davidsboteron/log-reader:1
+          volumeMounts:
+            - name: shared-status
+              mountPath: /usr/src/app/files
