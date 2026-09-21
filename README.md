@@ -69,3 +69,4 @@ Each exercise is a [release](https://github.com/DavidBotero/KubernetesSubmission
 - [5.2.](https://github.com/DavidBotero/KubernetesSubmissions/tree/5.2/istio)
 - [5.3.](https://github.com/DavidBotero/KubernetesSubmissions/tree/5.3/log_output)
 - [5.4.](https://github.com/DavidBotero/KubernetesSubmissions/tree/5.4/wikipedia)
+- [5.5.](https://github.com/DavidBotero/KubernetesSubmissions/tree/5.5/platforms)
