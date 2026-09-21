@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wikipedia
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wikipedia-dep
+  namespace: wikipedia
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wikipedia
+  template:
+    metadata:
+      labels:
+        app: wikipedia
+    spec:
+      volumes:
+        - name: www
+          emptyDir: {}
+      initContainers:
+        # runs to completion first and saves the Kubernetes page for nginx to serve
+        - name: fetch-kubernetes-page
+          image: curlimages/curl:8.11.1
+          command:
+            - sh
+            - -c
+            - curl -sSL -A "$USER_AGENT" -o /www/index.html https://en.wikipedia.org/wiki/Kubernetes
+          env:
+            - name: USER_AGENT
+              value: "KubernetesSubmissions-wikipedia/1.0 (https://github.com/DavidBotero/KubernetesSubmissions)"
+          volumeMounts:
+            - name: www
+              mountPath: /www
+        # a sidecar (an init container that keeps running) that replaces the page
+        # with a random one after waiting between 5 and 15 minutes, again and again
+        - name: random-page
+          image: curlimages/curl:8.11.1
+          restartPolicy: Always
+          command:
+            - sh
+            - -c
+            - |
+              while true; do
+                wait=$(awk "BEGIN { srand(); print int($MIN_WAIT_SECONDS + rand() * ($MAX_WAIT_SECONDS - $MIN_WAIT_SECONDS + 1)) }")
+                echo "waiting $wait seconds for the next random page"
+                sleep $wait
+                if curl -sSL -A "$USER_AGENT" -o /www/random.html https://en.wikipedia.org/wiki/Special:Random; then
+                  mv /www/random.html /www/index.html
+                  echo "saved a new page: $(grep -o '<title>[^<]*' /www/index.html | head -1 | cut -c8-)"
+                fi
+              done
+          env:
+            - name: MIN_WAIT_SECONDS
+              value: "300"
+            - name: MAX_WAIT_SECONDS
+              value: "900"
+            - name: USER_AGENT
+              value: "KubernetesSubmissions-wikipedia/1.0 (https://github.com/DavidBotero/KubernetesSubmissions)"
+          volumeMounts:
+            - name: www
+              mountPath: /www
+      containers:
+        - name: nginx
+          image: nginx:1.29-alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: www
+              mountPath: /usr/share/nginx/html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wikipedia-svc
+  namespace: wikipedia
+spec:
+  type: ClusterIP
+  selector:
+    app: wikipedia
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
