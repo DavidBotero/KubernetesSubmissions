@@ -56,7 +56,7 @@ const server = http.createServer(async (req, res) => {
   console.log(`${req.method} ${req.url}`)
 
   if (req.method === 'GET' && req.url === '/todos') {
-    const result = await client.query('SELECT content, done FROM todos ORDER BY id')
+    const result = await client.query('SELECT id, content, done FROM todos ORDER BY id')
     sendJson(res, 200, result.rows)
     return
   }
@@ -78,10 +78,34 @@ const server = http.createServer(async (req, res) => {
 
     console.log(`todo created: ${content}`)
     const result = await client.query(
-      'INSERT INTO todos (content) VALUES ($1) RETURNING content, done',
+      'INSERT INTO todos (content) VALUES ($1) RETURNING id, content, done',
       [content]
     )
     sendJson(res, 201, result.rows[0])
+    return
+  }
+
+  const todoPath = req.url.match(/^\/todos\/(\d+)$/)
+  if (req.method === 'PUT' && todoPath) {
+    const body = await readBody(req)
+    let done = true
+    try {
+      if (body) done = JSON.parse(body).done !== false
+    } catch (e) {
+      done = true
+    }
+
+    const result = await client.query(
+      'UPDATE todos SET done = $2 WHERE id = $1 RETURNING id, content, done',
+      [todoPath[1], done]
+    )
+    if (result.rows.length === 0) {
+      sendJson(res, 404, { error: 'todo not found' })
+      return
+    }
+
+    console.log(`todo ${todoPath[1]} marked as ${done ? 'done' : 'not done'}`)
+    sendJson(res, 200, result.rows[0])
     return
   }
 

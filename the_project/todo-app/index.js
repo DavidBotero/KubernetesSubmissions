@@ -41,6 +41,14 @@ const createTodo = async (content) => {
   })
 }
 
+const markDone = async (id) => {
+  await fetch(`${TODO_BACKEND_URL}/todos/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ done: true }),
+  })
+}
+
 const renderPage = (todos) => `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,8 +66,17 @@ const renderPage = (todos) => `<!DOCTYPE html>
       <form action="/break" method="post">
         <button type="submit">Break the app</button>
       </form>
+      <h2>Todo</h2>
       <ul>
-${todos.map((todo) => `        <li>${todo.content}</li>`).join('\n')}
+${todos.filter((todo) => !todo.done).map((todo) => `        <li>${todo.content}
+          <form action="/todos/${todo.id}/done" method="post" style="display: inline">
+            <button type="submit">Mark as done</button>
+          </form>
+        </li>`).join('\n')}
+      </ul>
+      <h2>Done</h2>
+      <ul>
+${todos.filter((todo) => todo.done).map((todo) => `        <li>${todo.content}</li>`).join('\n')}
       </ul>
       <p>DevOps with Kubernetes 2026</p>
     </div>
@@ -100,6 +117,14 @@ const server = http.createServer(async (req, res) => {
     const image = fs.readFileSync(IMAGE_PATH)
     res.writeHead(200, { 'Content-Type': 'image/jpeg' })
     res.end(image)
+    return
+  }
+
+  const donePath = req.url.match(/^\/todos\/(\d+)\/done$/)
+  if (req.method === 'POST' && donePath) {
+    await markDone(donePath[1])
+    res.writeHead(303, { Location: '/' })
+    res.end()
     return
   }
 
