@@ -20,6 +20,13 @@ spec:
           initContainers:
             - name: dump
               image: postgres:18.0
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 128Mi
               command: ["/bin/sh", "-c", 'pg_dump "$DATABASE_URL" > /backup/todos.sql']
               env:
                 - name: DATABASE_URL
@@ -33,6 +40,13 @@ spec:
           containers:
             - name: upload
               image: gcr.io/google.com/cloudsdktool/google-cloud-cli:alpine
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 96Mi
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
               command: ["/bin/sh", "-c"]
               args:
                 - |
