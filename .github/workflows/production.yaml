@@ -6,7 +6,7 @@ on:
       - "*"
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
 
 concurrency:
@@ -17,6 +17,7 @@ env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   REGISTRY: europe-north1-docker.pkg.dev
   REPOSITORY: dwk-repository
+  CONFIG_REPO: git@github.com:DavidBotero/KubernetesSubmissions-config.git
 
 jobs:
   build-publish:
@@ -27,8 +28,6 @@ jobs:
     steps:
       - name: Checkout the tagged commit
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v3
@@ -51,21 +50,27 @@ jobs:
             docker push "$image"
           done
 
-      # the new tags are committed to main, where ArgoCD watches the production overlay
-      - name: Switch to main
-        run: git checkout -B main origin/main
-
-      - name: Use the new images
-        working-directory: the_project/overlays/production
+      # the configuration lives in another repository, which ArgoCD watches
+      - name: Update the production configuration
+        env:
+          CONFIG_DEPLOY_KEY: ${{ secrets.CONFIG_DEPLOY_KEY }}
         run: |-
+          mkdir -p ~/.ssh
+          echo "$CONFIG_DEPLOY_KEY" > ~/.ssh/config_deploy_key
+          chmod 600 ~/.ssh/config_deploy_key
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/config_deploy_key -o IdentitiesOnly=yes"
+          git clone $CONFIG_REPO config
+          cd config/overlays/production
           kustomize edit set image \
             PROJECT/TODO_APP=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-app:$GITHUB_SHA \
             PROJECT/TODO_BACKEND=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$GITHUB_SHA \
             PROJECT/TODO_CRON=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-cron:$GITHUB_SHA \
             PROJECT/BROADCASTER=$REGISTRY/$PROJECT_ID/$REPOSITORY/broadcaster:$GITHUB_SHA
-
-      - name: Commit kustomization.yaml to GitHub
-        uses: EndBug/add-and-commit@v10
-        with:
-          add: the_project/overlays/production/kustomization.yaml
-          message: New production version released ${{ github.ref_name }}
+          cd ../..
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add overlays/production/kustomization.yaml
+          git commit -m "New production version released $GITHUB_REF_NAME"
+          git pull --rebase origin main
+          git push origin main

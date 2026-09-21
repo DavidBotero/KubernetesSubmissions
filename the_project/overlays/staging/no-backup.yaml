@@ -1,6 +1,0 @@
-$patch: delete
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: todo-backup
-  namespace: project

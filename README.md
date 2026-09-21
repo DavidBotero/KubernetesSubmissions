@@ -59,3 +59,4 @@ Submissions for the DevOps with Kubernetes course.
 - [4.7.](./log_output)
 - [4.8.](./the_project)
 - [4.9.](./the_project)
+- [4.10.](https://github.com/DavidBotero/KubernetesSubmissions-config)
