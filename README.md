@@ -42,3 +42,4 @@ Submissions for the DevOps with Kubernetes course.
 - [3.5.](./the_project)
 - [3.6.](./the_project)
 - [3.7.](./the_project)
+- [3.8.](./.github/workflows)
