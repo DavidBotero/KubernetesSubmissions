@@ -11,7 +11,7 @@ resources:
 images:
 - name: PROJECT/LOG_READER
   newName: europe-north1-docker.pkg.dev/dwk-gke-233649/dwk-repository/log-reader
-  newTag: 1dc90ac79a43d2d9715311a25f9b126d6afc3a60
+  newTag: ec0f4ef8e1123ef980e55f928f2904941e8d0b30
 - name: PROJECT/LOG_WRITER
   newName: europe-north1-docker.pkg.dev/dwk-gke-233649/dwk-repository/log-writer
-  newTag: 1dc90ac79a43d2d9715311a25f9b126d6afc3a60
+  newTag: ec0f4ef8e1123ef980e55f928f2904941e8d0b30
