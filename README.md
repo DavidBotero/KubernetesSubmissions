@@ -62,3 +62,7 @@ Each exercise is a [release](https://github.com/DavidBotero/KubernetesSubmission
 - [4.8.](https://github.com/DavidBotero/KubernetesSubmissions/tree/4.8/the_project)
 - [4.9.](https://github.com/DavidBotero/KubernetesSubmissions/tree/4.9/the_project)
 - [4.10.](https://github.com/DavidBotero/KubernetesSubmissions-config)
+
+### Chapter 6
+
+- [5.1.](https://github.com/DavidBotero/KubernetesSubmissions/tree/5.1/dummy_site)
