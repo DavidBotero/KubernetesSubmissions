@@ -60,7 +60,7 @@ jobs:
 
       - name: Build and publish images
         run: |
-          for app in todo-app todo-backend todo-cron; do
+          for app in todo-app todo-backend todo-cron broadcaster; do
             image="$REGISTRY/$PROJECT_ID/$REPOSITORY/$app:$IMAGE_TAG"
             docker build --tag "$image" "the_project/$app"
             docker push "$image"
@@ -80,9 +80,11 @@ jobs:
           kustomize edit set image \
             PROJECT/TODO_APP=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-app:$IMAGE_TAG \
             PROJECT/TODO_BACKEND=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$IMAGE_TAG \
-            PROJECT/TODO_CRON=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-cron:$IMAGE_TAG
+            PROJECT/TODO_CRON=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-cron:$IMAGE_TAG \
+            PROJECT/BROADCASTER=$REGISTRY/$PROJECT_ID/$REPOSITORY/broadcaster:$IMAGE_TAG
           kustomize build . | kubectl apply -f -
           kubectl -n $NAMESPACE rollout status statefulset/todo-postgres-ss --timeout=300s
           kubectl -n $NAMESPACE rollout status deployment/todo-backend-dep --timeout=300s
           kubectl -n $NAMESPACE rollout status deployment/todo-app-dep --timeout=300s
+          kubectl -n $NAMESPACE rollout status deployment/broadcaster-dep --timeout=300s
           kubectl -n $NAMESPACE get all,ingress -o wide

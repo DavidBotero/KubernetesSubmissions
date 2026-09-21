@@ -1,10 +1,29 @@
 const http = require('http')
 const { Client } = require('pg')
+const { connect, StringCodec } = require('nats')
 
 const PORT = process.env.PORT
 const DATABASE_URL = process.env.DATABASE_URL
+const NATS_URL = process.env.NATS_URL
+const NAMESPACE = process.env.NAMESPACE || 'default'
 
 let client
+let nats
+const codec = StringCodec()
+
+if (NATS_URL) {
+  connect({ servers: NATS_URL, waitOnFirstConnect: true, maxReconnectAttempts: -1 })
+    .then((connection) => {
+      nats = connection
+      console.log('connected to NATS')
+    })
+    .catch((e) => console.log(`could not connect to NATS: ${e.message}`))
+}
+
+const publish = (message, todo) => {
+  if (!nats) return
+  nats.publish(`todos.${NAMESPACE}`, codec.encode(JSON.stringify({ user: 'bot', message, todo })))
+}
 
 const connectWithRetry = async () => {
   while (true) {
@@ -81,6 +100,7 @@ const server = http.createServer(async (req, res) => {
       'INSERT INTO todos (content) VALUES ($1) RETURNING id, content, done',
       [content]
     )
+    publish('A todo was created', result.rows[0])
     sendJson(res, 201, result.rows[0])
     return
   }
@@ -105,6 +125,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     console.log(`todo ${todoPath[1]} marked as ${done ? 'done' : 'not done'}`)
+    publish('A todo was updated', result.rows[0])
     sendJson(res, 200, result.rows[0])
     return
   }
