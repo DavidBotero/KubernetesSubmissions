@@ -3,26 +3,27 @@ name: Release application
 on:
   push:
     branches:
-      - "**"
+      - main
+    paths:
+      - "the_project/**"
+      - ".github/workflows/main.yaml"
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 concurrency:
-  group: deploy-${{ github.ref_name }}
+  group: release
   cancel-in-progress: false
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-  GKE_CLUSTER: dwk-cluster
-  GKE_ZONE: europe-north1-b
   REGISTRY: europe-north1-docker.pkg.dev
   REPOSITORY: dwk-repository
 
 jobs:
-  build-publish-deploy:
-    name: Build, Publish and Deploy
+  build-publish:
+    name: Build, Push, Release
     runs-on: ubuntu-latest
     environment: GKE_PROJECT
 
@@ -39,52 +40,29 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v3
 
-      - name: Get GKE credentials
-        uses: google-github-actions/get-gke-credentials@v3
-        with:
-          cluster_name: "${{ env.GKE_CLUSTER }}"
-          project_id: "${{ env.PROJECT_ID }}"
-          location: "${{ env.GKE_ZONE }}"
-
       - name: Configure Docker for Artifact Registry
         run: gcloud --quiet auth configure-docker $REGISTRY
 
-      - name: Form the namespace and image tag
-        run: |
-          if [ "$GITHUB_REF_NAME" = "main" ]; then
-            echo "NAMESPACE=project" >> $GITHUB_ENV
-          else
-            echo "NAMESPACE=$GITHUB_REF_NAME" >> $GITHUB_ENV
-          fi
-          echo "IMAGE_TAG=${GITHUB_REF_NAME//\//-}-$GITHUB_SHA" >> $GITHUB_ENV
-
+      # tag the images with the commit SHA to get a unique tag
       - name: Build and publish images
         run: |
           for app in todo-app todo-backend todo-cron broadcaster; do
-            image="$REGISTRY/$PROJECT_ID/$REPOSITORY/$app:$IMAGE_TAG"
+            image="$REGISTRY/$PROJECT_ID/$REPOSITORY/$app:$GITHUB_SHA"
             docker build --tag "$image" "the_project/$app"
             docker push "$image"
           done
 
-      - name: Deploy
+      - name: Use the new images
         working-directory: the_project
-        env:
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |-
-          kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
-          kubectl create secret generic todo-postgres-secret --namespace $NAMESPACE \
-            --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
-            --from-literal=DATABASE_URL="postgres://postgres:$POSTGRES_PASSWORD@todo-postgres-svc:5432/postgres" \
-            --dry-run=client -o yaml | kubectl apply -f -
-          kustomize edit set namespace $NAMESPACE
           kustomize edit set image \
-            PROJECT/TODO_APP=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-app:$IMAGE_TAG \
-            PROJECT/TODO_BACKEND=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$IMAGE_TAG \
-            PROJECT/TODO_CRON=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-cron:$IMAGE_TAG \
-            PROJECT/BROADCASTER=$REGISTRY/$PROJECT_ID/$REPOSITORY/broadcaster:$IMAGE_TAG
-          kustomize build . | kubectl apply -f -
-          kubectl -n $NAMESPACE rollout status statefulset/todo-postgres-ss --timeout=300s
-          kubectl -n $NAMESPACE rollout status deployment/todo-backend-dep --timeout=300s
-          kubectl -n $NAMESPACE rollout status deployment/todo-app-dep --timeout=300s
-          kubectl -n $NAMESPACE rollout status deployment/broadcaster-dep --timeout=300s
-          kubectl -n $NAMESPACE get all,ingress -o wide
+            PROJECT/TODO_APP=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-app:$GITHUB_SHA \
+            PROJECT/TODO_BACKEND=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$GITHUB_SHA \
+            PROJECT/TODO_CRON=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-cron:$GITHUB_SHA \
+            PROJECT/BROADCASTER=$REGISTRY/$PROJECT_ID/$REPOSITORY/broadcaster:$GITHUB_SHA
+
+      - name: Commit kustomization.yaml to GitHub
+        uses: EndBug/add-and-commit@v10
+        with:
+          add: the_project/kustomization.yaml
+          message: New project version released ${{ github.sha }}

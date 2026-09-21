@@ -57,3 +57,4 @@ Submissions for the DevOps with Kubernetes course.
 - [4.5.](./the_project)
 - [4.6.](./the_project)
 - [4.7.](./log_output)
+- [4.8.](./the_project)
