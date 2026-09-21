@@ -25,6 +25,17 @@ const fetchPongs = async () => {
 }
 
 const server = http.createServer(async (req, res) => {
+  if (req.url === '/healthz') {
+    try {
+      const response = await fetch(PINGPONG_URL, { signal: AbortSignal.timeout(2000) })
+      res.writeHead(response.ok ? 200 : 500)
+    } catch (e) {
+      res.writeHead(500)
+    }
+    res.end()
+    return
+  }
+
   const status = readFileOrDefault(STATUS_FILE, 'waiting for data...')
   const fileContent = readFileOrDefault(CONFIG_FILE, '')
   const pongs = await fetchPongs()

@@ -47,6 +47,18 @@ const getCount = async () => {
 }
 
 const server = http.createServer(async (req, res) => {
+  if (req.url === '/healthz') {
+    try {
+      await client.query('SELECT 1')
+      res.writeHead(200)
+      res.end('ok')
+    } catch (e) {
+      res.writeHead(500)
+      res.end('database unavailable')
+    }
+    return
+  }
+
   if (req.url === '/pongs') {
     const count = await getCount()
     res.writeHead(200, { 'Content-Type': 'text/plain' })

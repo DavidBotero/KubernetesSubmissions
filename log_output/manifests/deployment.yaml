@@ -26,7 +26,13 @@ spec:
             - name: shared-status
               mountPath: /usr/src/app/files
         - name: log-reader
-          image: davidsboteron/log-reader:4
+          image: davidbotero/log-reader:5
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
           env:
             - name: MESSAGE
               valueFrom:
