@@ -71,3 +71,4 @@ Each exercise is a [release](https://github.com/DavidBotero/KubernetesSubmission
 - [5.4.](https://github.com/DavidBotero/KubernetesSubmissions/tree/5.4/wikipedia)
 - [5.5.](https://github.com/DavidBotero/KubernetesSubmissions/tree/5.5/platforms)
 - [5.6.](https://github.com/DavidBotero/KubernetesSubmissions/tree/5.6/knative)
+- [5.7.](https://github.com/DavidBotero/KubernetesSubmissions/tree/5.7/ping_pong)
