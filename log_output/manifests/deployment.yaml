@@ -39,6 +39,8 @@ spec:
                 configMapKeyRef:
                   name: log-output-config
                   key: MESSAGE
+            - name: PINGPONG_URL
+              value: http://pingpong.exercises.svc.cluster.local/pongs
           volumeMounts:
             - name: shared-status
               mountPath: /usr/src/app/files
