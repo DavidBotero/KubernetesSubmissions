@@ -1,19 +1,16 @@
-name: Release to staging
+name: Release to production
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - "the_project/**"
-      - ".github/workflows/main.yaml"
+    tags:
+      - "*"
 
 permissions:
   contents: write
   id-token: write
 
 concurrency:
-  group: release
+  group: release-production
   cancel-in-progress: false
 
 env:
@@ -28,8 +25,10 @@ jobs:
     environment: GKE_PROJECT
 
     steps:
-      - name: Checkout
+      - name: Checkout the tagged commit
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v3
@@ -43,8 +42,7 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud --quiet auth configure-docker $REGISTRY
 
-      # tag the images with the commit SHA to get a unique tag, so that ArgoCD
-      # rolls the deployments when the tags in kustomization.yaml change
+      # the images are built from the tagged commit and tagged with its SHA
       - name: Build and publish images
         run: |
           for app in todo-app todo-backend todo-cron broadcaster; do
@@ -53,8 +51,12 @@ jobs:
             docker push "$image"
           done
 
+      # the new tags are committed to main, where ArgoCD watches the production overlay
+      - name: Switch to main
+        run: git checkout -B main origin/main
+
       - name: Use the new images
-        working-directory: the_project/overlays/staging
+        working-directory: the_project/overlays/production
         run: |-
           kustomize edit set image \
             PROJECT/TODO_APP=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-app:$GITHUB_SHA \
@@ -65,5 +67,5 @@ jobs:
       - name: Commit kustomization.yaml to GitHub
         uses: EndBug/add-and-commit@v10
         with:
-          add: the_project/overlays/staging/kustomization.yaml
-          message: New staging version released ${{ github.sha }}
+          add: the_project/overlays/production/kustomization.yaml
+          message: New production version released ${{ github.ref_name }}
