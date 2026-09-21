@@ -1,0 +1,65 @@
+name: Build log output
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "log_output/**"
+      - ".github/workflows/log-output.yaml"
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: log-output
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  REGISTRY: europe-north1-docker.pkg.dev
+  REPOSITORY: dwk-repository
+
+jobs:
+  build-publish:
+    name: Build, Push, Release
+    runs-on: ubuntu-latest
+    environment: GKE_PROJECT
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: "${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}"
+          service_account: "${{ secrets.SERVICE_ACCOUNT }}"
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud --quiet auth configure-docker $REGISTRY
+
+      # tag the images with the commit SHA to get a unique tag
+      - name: Build and publish images
+        run: |-
+          docker build --tag "$REGISTRY/$PROJECT_ID/$REPOSITORY/log-writer:$GITHUB_SHA" log_output/writer
+          docker push "$REGISTRY/$PROJECT_ID/$REPOSITORY/log-writer:$GITHUB_SHA"
+          docker build --tag "$REGISTRY/$PROJECT_ID/$REPOSITORY/log-reader:$GITHUB_SHA" log_output/reader
+          docker push "$REGISTRY/$PROJECT_ID/$REPOSITORY/log-reader:$GITHUB_SHA"
+
+      - name: Use the new images
+        working-directory: log_output
+        run: |-
+          kustomize edit set image \
+            PROJECT/LOG_WRITER=$REGISTRY/$PROJECT_ID/$REPOSITORY/log-writer:$GITHUB_SHA \
+            PROJECT/LOG_READER=$REGISTRY/$PROJECT_ID/$REPOSITORY/log-reader:$GITHUB_SHA
+
+      - name: Commit kustomization.yaml to GitHub
+        uses: EndBug/add-and-commit@v10
+        with:
+          add: log_output/kustomization.yaml
+          message: New log output version released ${{ github.sha }}
