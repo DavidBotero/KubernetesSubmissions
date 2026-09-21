@@ -19,7 +19,7 @@ spec:
             claimName: project-pvc
       containers:
         - name: todo-app
-          image: davidsboteron/todo-app:6
+          image: PROJECT/TODO_APP
           env:
             - name: PORT
               value: "3000"
