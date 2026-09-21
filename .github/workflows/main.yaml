@@ -3,7 +3,7 @@ name: Release application
 on:
   push:
     branches:
-      - main
+      - "**"
 
 permissions:
   contents: read
@@ -19,7 +19,6 @@ env:
   GKE_ZONE: europe-north1-b
   REGISTRY: europe-north1-docker.pkg.dev
   REPOSITORY: dwk-repository
-  NAMESPACE: project
 
 jobs:
   build-publish-deploy:
@@ -50,8 +49,14 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud --quiet auth configure-docker $REGISTRY
 
-      - name: Form the image tag
-        run: echo "IMAGE_TAG=${GITHUB_REF_NAME//\//-}-$GITHUB_SHA" >> $GITHUB_ENV
+      - name: Form the namespace and image tag
+        run: |
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
+            echo "NAMESPACE=project" >> $GITHUB_ENV
+          else
+            echo "NAMESPACE=$GITHUB_REF_NAME" >> $GITHUB_ENV
+          fi
+          echo "IMAGE_TAG=${GITHUB_REF_NAME//\//-}-$GITHUB_SHA" >> $GITHUB_ENV
 
       - name: Build and publish images
         run: |
