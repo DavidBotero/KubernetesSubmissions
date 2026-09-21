@@ -2,26 +2,26 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: project
 resources:
-  - manifests/todo-app-pvc.yaml
-  - manifests/todo-postgres.yaml
-  - manifests/todo-backend-deployment.yaml
-  - manifests/todo-backend-service.yaml
-  - manifests/broadcaster-deployment.yaml
-  - manifests/todo-app-deployment.yaml
-  - manifests/todo-app-service.yaml
-  - manifests/todo-app-ingress.yaml
-  - manifests/todo-cronjob.yaml
-  - manifests/todo-backup-cronjob.yaml
+- manifests/todo-app-pvc.yaml
+- manifests/todo-postgres.yaml
+- manifests/todo-backend-deployment.yaml
+- manifests/todo-backend-service.yaml
+- manifests/broadcaster-deployment.yaml
+- manifests/todo-app-deployment.yaml
+- manifests/todo-app-service.yaml
+- manifests/todo-app-ingress.yaml
+- manifests/todo-cronjob.yaml
+- manifests/todo-backup-cronjob.yaml
 images:
-  - name: PROJECT/TODO_APP
-    newName: davidsboteron/todo-app
-    newTag: "6"
-  - name: PROJECT/TODO_BACKEND
-    newName: davidbotero/todo-backend
-    newTag: "5"
-  - name: PROJECT/BROADCASTER
-    newName: davidbotero/broadcaster
-    newTag: "1"
-  - name: PROJECT/TODO_CRON
-    newName: davidsboteron/todo-cron
-    newTag: "2"
+- name: PROJECT/BROADCASTER
+  newName: europe-north1-docker.pkg.dev/dwk-gke-233649/dwk-repository/broadcaster
+  newTag: a499b6ba2338446470d940eb7edcbb835f1c0dbe
+- name: PROJECT/TODO_APP
+  newName: europe-north1-docker.pkg.dev/dwk-gke-233649/dwk-repository/todo-app
+  newTag: a499b6ba2338446470d940eb7edcbb835f1c0dbe
+- name: PROJECT/TODO_BACKEND
+  newName: europe-north1-docker.pkg.dev/dwk-gke-233649/dwk-repository/todo-backend
+  newTag: a499b6ba2338446470d940eb7edcbb835f1c0dbe
+- name: PROJECT/TODO_CRON
+  newName: europe-north1-docker.pkg.dev/dwk-gke-233649/dwk-repository/todo-cron
+  newTag: a499b6ba2338446470d940eb7edcbb835f1c0dbe
