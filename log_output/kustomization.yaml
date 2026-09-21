@@ -6,6 +6,8 @@ resources:
 - manifests/service.yaml
 - manifests/gateway.yaml
 - manifests/route.yaml
+- manifests/waypoint.yaml
+- manifests/greeter.yaml
 images:
 - name: PROJECT/LOG_READER
   newName: europe-north1-docker.pkg.dev/dwk-gke-233649/dwk-repository/log-reader
