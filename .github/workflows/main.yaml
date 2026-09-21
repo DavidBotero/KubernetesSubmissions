@@ -1,4 +1,4 @@
-name: Release application
+name: Release to staging
 
 on:
   push:
@@ -54,7 +54,7 @@ jobs:
           done
 
       - name: Use the new images
-        working-directory: the_project
+        working-directory: the_project/overlays/staging
         run: |-
           kustomize edit set image \
             PROJECT/TODO_APP=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-app:$GITHUB_SHA \
@@ -65,5 +65,5 @@ jobs:
       - name: Commit kustomization.yaml to GitHub
         uses: EndBug/add-and-commit@v10
         with:
-          add: the_project/kustomization.yaml
-          message: New project version released ${{ github.sha }}
+          add: the_project/overlays/staging/kustomization.yaml
+          message: New staging version released ${{ github.sha }}
