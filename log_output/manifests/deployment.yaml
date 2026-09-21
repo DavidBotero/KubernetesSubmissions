@@ -21,12 +21,12 @@ spec:
             name: log-output-config
       containers:
         - name: log-writer
-          image: davidsboteron/log-writer:1
+          image: PROJECT/LOG_WRITER
           volumeMounts:
             - name: shared-status
               mountPath: /usr/src/app/files
         - name: log-reader
-          image: davidbotero/log-reader:5
+          image: PROJECT/LOG_READER
           readinessProbe:
             initialDelaySeconds: 5
             periodSeconds: 5
