@@ -43,6 +43,16 @@ const readBody = (req) => new Promise((resolve) => {
 })
 
 const server = http.createServer(async (req, res) => {
+  if (req.url === '/healthz') {
+    try {
+      await client.query('SELECT 1')
+      sendJson(res, 200, { status: 'ok' })
+    } catch (e) {
+      sendJson(res, 500, { status: 'database unavailable' })
+    }
+    return
+  }
+
   console.log(`${req.method} ${req.url}`)
 
   if (req.method === 'GET' && req.url === '/todos') {

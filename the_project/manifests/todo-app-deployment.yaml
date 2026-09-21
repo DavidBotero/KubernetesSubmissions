@@ -22,6 +22,18 @@ spec:
       containers:
         - name: todo-app
           image: PROJECT/TODO_APP
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
+          livenessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
           resources:
             requests:
               cpu: 10m

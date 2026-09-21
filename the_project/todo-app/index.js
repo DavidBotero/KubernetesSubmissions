@@ -55,6 +55,9 @@ const renderPage = (todos) => `<!DOCTYPE html>
         <input type="text" id="content" name="content" maxlength="140" required>
         <button type="submit">Create todo</button>
       </form>
+      <form action="/break" method="post">
+        <button type="submit">Break the app</button>
+      </form>
       <ul>
 ${todos.map((todo) => `        <li>${todo.content}</li>`).join('\n')}
       </ul>
@@ -70,7 +73,28 @@ const readBody = (req) => new Promise((resolve) => {
   req.on('end', () => resolve(body))
 })
 
+let isHealthy = true
+
 const server = http.createServer(async (req, res) => {
+  if (req.url === '/healthz') {
+    res.writeHead(isHealthy ? 200 : 500, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ status: isHealthy ? 'ok' : 'unhealthy' }))
+    return
+  }
+
+  if (req.method === 'POST' && req.url === '/break') {
+    isHealthy = false
+    res.writeHead(303, { Location: '/' })
+    res.end()
+    return
+  }
+
+  if (!isHealthy) {
+    res.writeHead(500, { 'Content-Type': 'text/plain' })
+    res.end('The app is broken. Kubernetes will restart it soon.')
+    return
+  }
+
   if (req.url === '/image') {
     await ensureImage()
     const image = fs.readFileSync(IMAGE_PATH)
