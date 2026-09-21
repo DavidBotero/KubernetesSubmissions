@@ -7,9 +7,10 @@ A todo application made of four small Node.js pieces that run in Kubernetes.
 | `todo-app` | Web frontend. Serves the page, the cached hourly image and the todo form. |
 | `todo-backend` | REST API for creating and listing todos, stored in Postgres. |
 | `todo-cron` | Hourly CronJob that creates a todo asking to read a random Wikipedia article. |
+| `broadcaster` | Subscribes to the todo messages that the backend publishes to NATS and forwards them to a webhook. |
 | Postgres | StatefulSet with a persistent volume. |
 
-The manifests are in [manifests](./manifests) and are tied together by [kustomization.yaml](./kustomization.yaml).
+This repository only holds the code. The Kubernetes configuration (Kustomize base, the staging and production overlays and the ArgoCD Applications) lives in [KubernetesSubmissions-config](https://github.com/DavidBotero/KubernetesSubmissions-config). The workflows here build the images and commit their new tags to that repository, and ArgoCD deploys them.
 
 ## DBaaS vs DIY
 

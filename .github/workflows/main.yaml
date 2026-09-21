@@ -9,17 +9,18 @@ on:
       - ".github/workflows/main.yaml"
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
 
 concurrency:
-  group: release
+  group: release-staging
   cancel-in-progress: false
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   REGISTRY: europe-north1-docker.pkg.dev
   REPOSITORY: dwk-repository
+  CONFIG_REPO: git@github.com:DavidBotero/KubernetesSubmissions-config.git
 
 jobs:
   build-publish:
@@ -43,8 +44,7 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud --quiet auth configure-docker $REGISTRY
 
-      # tag the images with the commit SHA to get a unique tag, so that ArgoCD
-      # rolls the deployments when the tags in kustomization.yaml change
+      # tag the images with the commit SHA to get a unique tag
       - name: Build and publish images
         run: |
           for app in todo-app todo-backend todo-cron broadcaster; do
@@ -53,17 +53,27 @@ jobs:
             docker push "$image"
           done
 
-      - name: Use the new images
-        working-directory: the_project/overlays/staging
+      # the configuration lives in another repository, which ArgoCD watches
+      - name: Update the staging configuration
+        env:
+          CONFIG_DEPLOY_KEY: ${{ secrets.CONFIG_DEPLOY_KEY }}
         run: |-
+          mkdir -p ~/.ssh
+          echo "$CONFIG_DEPLOY_KEY" > ~/.ssh/config_deploy_key
+          chmod 600 ~/.ssh/config_deploy_key
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/config_deploy_key -o IdentitiesOnly=yes"
+          git clone $CONFIG_REPO config
+          cd config/overlays/staging
           kustomize edit set image \
             PROJECT/TODO_APP=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-app:$GITHUB_SHA \
             PROJECT/TODO_BACKEND=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$GITHUB_SHA \
             PROJECT/TODO_CRON=$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-cron:$GITHUB_SHA \
             PROJECT/BROADCASTER=$REGISTRY/$PROJECT_ID/$REPOSITORY/broadcaster:$GITHUB_SHA
-
-      - name: Commit kustomization.yaml to GitHub
-        uses: EndBug/add-and-commit@v10
-        with:
-          add: the_project/overlays/staging/kustomization.yaml
-          message: New staging version released ${{ github.sha }}
+          cd ../..
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add overlays/staging/kustomization.yaml
+          git commit -m "New staging version released $GITHUB_SHA"
+          git pull --rebase origin main
+          git push origin main
