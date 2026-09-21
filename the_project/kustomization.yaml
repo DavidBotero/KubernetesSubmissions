@@ -3,7 +3,6 @@ kind: Kustomization
 namespace: project
 resources:
   - manifests/todo-app-pvc.yaml
-  - manifests/todo-postgres-secret.yaml
   - manifests/todo-postgres.yaml
   - manifests/todo-backend-deployment.yaml
   - manifests/todo-backend-service.yaml
