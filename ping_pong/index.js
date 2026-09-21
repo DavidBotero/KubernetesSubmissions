@@ -54,16 +54,9 @@ const server = http.createServer(async (req, res) => {
     return
   }
 
-  if (req.url === '/pingpong') {
-    const count = await bumpAndGetCount()
-    res.writeHead(200, { 'Content-Type': 'text/plain' })
-    res.end(`pong ${count - 1}`)
-    return
-  }
-
-  // GKE Ingress health checks GET / and needs a 200 there
+  const count = await bumpAndGetCount()
   res.writeHead(200, { 'Content-Type': 'text/plain' })
-  res.end('ok')
+  res.end(`pong ${count - 1}`)
 })
 
 init().then(() => {
