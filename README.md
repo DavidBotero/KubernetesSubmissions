@@ -45,3 +45,4 @@ Submissions for the DevOps with Kubernetes course.
 - [3.8.](./.github/workflows)
 - [3.9.](./the_project#dbaas-vs-diy)
 - [3.10.](./the_project)
+- [3.11.](./the_project)
