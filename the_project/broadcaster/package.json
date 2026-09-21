@@ -1,0 +1,9 @@
+{
+  "name": "broadcaster",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "nats": "^2.29.0"
+  }
+}

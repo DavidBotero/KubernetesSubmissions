@@ -55,3 +55,4 @@ Submissions for the DevOps with Kubernetes course.
 - [4.3.](./monitoring)
 - [4.4.](./ping_pong)
 - [4.5.](./the_project)
+- [4.6.](./the_project)
