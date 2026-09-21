@@ -40,3 +40,4 @@ Submissions for the DevOps with Kubernetes course.
 - [3.3.](./log_output)
 - [3.4.](./ping_pong)
 - [3.5.](./the_project)
+- [3.6.](./the_project)
