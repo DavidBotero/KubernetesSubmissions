@@ -51,3 +51,4 @@ Submissions for the DevOps with Kubernetes course.
 ### Chapter 5
 
 - [4.1.](./ping_pong)
+- [4.2.](./the_project)

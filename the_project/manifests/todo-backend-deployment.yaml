@@ -16,6 +16,12 @@ spec:
       containers:
         - name: todo-backend
           image: PROJECT/TODO_BACKEND
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
           resources:
             requests:
               cpu: 10m
