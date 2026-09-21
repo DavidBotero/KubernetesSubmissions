@@ -66,3 +66,4 @@ Each exercise is a [release](https://github.com/DavidBotero/KubernetesSubmission
 ### Chapter 6
 
 - [5.1.](https://github.com/DavidBotero/KubernetesSubmissions/tree/5.1/dummy_site)
+- [5.2.](https://github.com/DavidBotero/KubernetesSubmissions/tree/5.2/istio)
