@@ -6,6 +6,7 @@ const STATUS_FILE = '/usr/src/app/files/status.txt'
 const CONFIG_FILE = '/usr/src/app/config/information.txt'
 const MESSAGE = process.env.MESSAGE || ''
 const PINGPONG_URL = process.env.PINGPONG_URL || 'http://ping-pong-svc:3000/pongs'
+const GREETER_URL = process.env.GREETER_URL || 'http://greeter-svc:3000'
 
 const readFileOrDefault = (path, fallback) => {
   try {
@@ -24,6 +25,15 @@ const fetchPongs = async () => {
   }
 }
 
+const fetchGreeting = async () => {
+  try {
+    const response = await fetch(GREETER_URL, { signal: AbortSignal.timeout(2000) })
+    return await response.text()
+  } catch (e) {
+    return 'no greeting available'
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   if (req.url === '/healthz') {
     try {
@@ -39,12 +49,14 @@ const server = http.createServer(async (req, res) => {
   const status = readFileOrDefault(STATUS_FILE, 'waiting for data...')
   const fileContent = readFileOrDefault(CONFIG_FILE, '')
   const pongs = await fetchPongs()
+  const greeting = await fetchGreeting()
 
   const lines = [
     `file content: ${fileContent}`,
     `env variable: MESSAGE=${MESSAGE}`,
     `${status}.`,
     `Ping / Pongs: ${pongs}`,
+    `Greeting: ${greeting}`,
   ]
 
   res.writeHead(200, { 'Content-Type': 'text/plain' })
