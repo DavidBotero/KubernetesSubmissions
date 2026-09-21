@@ -1,15 +1,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - manifests/configmap.yaml
-  - manifests/deployment.yaml
-  - manifests/service.yaml
-  - manifests/gateway.yaml
-  - manifests/route.yaml
+- manifests/configmap.yaml
+- manifests/deployment.yaml
+- manifests/service.yaml
+- manifests/gateway.yaml
+- manifests/route.yaml
 images:
-  - name: PROJECT/LOG_WRITER
-    newName: davidsboteron/log-writer
-    newTag: "1"
-  - name: PROJECT/LOG_READER
-    newName: davidbotero/log-reader
-    newTag: "5"
+- name: PROJECT/LOG_READER
+  newName: europe-north1-docker.pkg.dev/dwk-gke-233649/dwk-repository/log-reader
+  newTag: cafe280dcb1f6fc4a5d8d6f0445fdc065d3ea5d1
+- name: PROJECT/LOG_WRITER
+  newName: europe-north1-docker.pkg.dev/dwk-gke-233649/dwk-repository/log-writer
+  newTag: cafe280dcb1f6fc4a5d8d6f0445fdc065d3ea5d1
