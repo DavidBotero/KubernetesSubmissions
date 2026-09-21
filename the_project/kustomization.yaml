@@ -10,6 +10,7 @@ resources:
   - manifests/todo-app-service.yaml
   - manifests/todo-app-ingress.yaml
   - manifests/todo-cronjob.yaml
+  - manifests/todo-backup-cronjob.yaml
 images:
   - name: PROJECT/TODO_APP
     newName: davidsboteron/todo-app
