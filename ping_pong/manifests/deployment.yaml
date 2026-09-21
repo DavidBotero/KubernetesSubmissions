@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: ping-pong
-          image: davidsboteron/ping-pong:4
+          image: davidbotero/ping-pong:5
           env:
             - name: DATABASE_URL
               value: "postgres://postgres:pingpong-example@pingpong-postgres-svc:5432/postgres"
