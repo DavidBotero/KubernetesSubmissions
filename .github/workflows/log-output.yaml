@@ -43,7 +43,8 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud --quiet auth configure-docker $REGISTRY
 
-      # tag the images with the commit SHA to get a unique tag
+      # tag the images with the commit SHA to get a unique tag, which makes
+      # ArgoCD roll the deployment when the tag in kustomization.yaml changes
       - name: Build and publish images
         run: |-
           docker build --tag "$REGISTRY/$PROJECT_ID/$REPOSITORY/log-writer:$GITHUB_SHA" log_output/writer
