@@ -28,3 +28,21 @@ The database can be a managed service (Google Cloud SQL) or a Postgres that we r
 For a course project with throwaway data, running Postgres ourselves is the sensible choice: it costs almost nothing, it is the same everywhere, and the daily dump to Cloud Storage covers the risk that matters here.
 
 For a real product with customer data the balance changes. The tested restore, point-in-time recovery, patching and failover that Cloud SQL includes are exactly what a small team is least able to build and keep working, and their price is usually lower than the cost of one serious data loss. The middle road is a Postgres operator in the cluster, which gives replication and continuous backups but still leaves the operating work with us.
+
+## Logs in GKE
+
+GKE has Cloud Logging turned on for the cluster, and it collects `stdout` and `stderr` from every container (the cluster logs system components and workloads), so the application logs need no extra setup.
+
+To find them in the Google Cloud console, go to **Kubernetes Engine > Workloads**, open `todo-backend-dep` and use the **Logs** tab, or go to **Logging > Logs Explorer** and run this query:
+
+```
+resource.type="k8s_container"
+resource.labels.cluster_name="dwk-cluster"
+resource.labels.namespace_name="project"
+resource.labels.container_name="todo-backend"
+(textPayload="POST /todos" OR textPayload:"todo created")
+```
+
+The same query works from the terminal with `gcloud logging read`. This is what the logs show when a new todo is created (the picture is rendered from the output of that command):
+
+![Logs of todo-backend when a todo is created](./logs-todo-created.png)
