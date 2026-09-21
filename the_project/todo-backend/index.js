@@ -4,12 +4,14 @@ const { Client } = require('pg')
 const PORT = process.env.PORT
 const DATABASE_URL = process.env.DATABASE_URL
 
-const client = new Client({ connectionString: DATABASE_URL })
+let client
 
 const connectWithRetry = async () => {
   while (true) {
+    const candidate = new Client({ connectionString: DATABASE_URL })
     try {
-      await client.connect()
+      await candidate.connect()
+      client = candidate
       return
     } catch (e) {
       console.log('waiting for database...')
