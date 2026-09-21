@@ -15,7 +15,13 @@ spec:
     spec:
       containers:
         - name: ping-pong
-          image: davidbotero/ping-pong:7
+          image: davidbotero/ping-pong:8
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3000
           env:
             - name: DATABASE_URL
               value: "postgres://postgres:pingpong-example@pingpong-postgres-svc:5432/postgres"
